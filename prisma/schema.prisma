@@ -45,9 +45,9 @@ model Tweet {
   media           String[]
   author          User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId        String
-  originalTweet   Tweet?    @relation("Responses", fields: [originalTweetId], references: [id], onDelete: Cascade)
+  originalTweet   Tweet?    @relation("replies", fields: [originalTweetId], references: [id], onDelete: Cascade)
   originalTweetId String?
-  responses       Tweet[]   @relation("Responses")
+  responses       Tweet[]   @relation("replies")
   likes           Like[]
   retweets        Retweet[]
   hashtags        Hashtag[]
