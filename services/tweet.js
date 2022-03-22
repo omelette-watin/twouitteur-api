@@ -123,6 +123,17 @@ exports.findRepliesByTweetId = async (tweetId, options = {}) => {
 
 exports.getUserFeed = async (userId, options = {}) => {
   try {
+    const user = await prisma.user.findUnique({ where: { id: userId }, include: { following: true } })
+
+    if (user.following.length === 0) {
+      return await prisma.tweet.findMany({
+        orderBy: {
+          createdAt: "desc"
+        },
+        ...options
+      })
+    }
+
     return await prisma.tweet.findMany({
       where: {
         OR: [

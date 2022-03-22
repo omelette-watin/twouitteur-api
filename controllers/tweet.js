@@ -103,7 +103,17 @@ exports.getMyFeed = async (req, res) => {
   const { userId } = req
 
   try {
-    const myFeed = await getUserFeed(userId)
+    const myFeed = await getUserFeed(userId, {
+      include: {
+        _count: {
+          select: {
+            responses: true,
+            likes: true,
+            retweets: true,
+          },
+        },
+      },
+    })
 
     return res.status(200).send(myFeed)
   } catch (err) {
