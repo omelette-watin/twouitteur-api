@@ -9,8 +9,22 @@ const extractHashtags = (str) => {
 
   return null
 }
+const handleHashtags  = async (hashtags) => {
+  const existingHashtags = await prisma.hashtag.findMany({
+    where: {
+      name: {
+        in: hashtags,
+      },
+    },
+  })
+  const notExistingHashtags = hashtags.filter(
+    (n) => !existingHashtags.map((h) => h.name).includes(n)
+  )
 
-exports.tweet = async (content, userId) => {
+  return { existingHashtags, notExistingHashtags }
+}
+
+exports.createTweet = async (content, userId) => {
   try {
     const hashtags = extractHashtags(content)
 
@@ -23,21 +37,46 @@ exports.tweet = async (content, userId) => {
       })
     }
 
-    const existingHashtags = await prisma.hashtag.findMany({
-      where: {
-        name: {
-          in: hashtags,
-        },
-      },
-    })
-    const notExistingHashtags = hashtags.filter(
-      (n) => !existingHashtags.map((h) => h.name).includes(n)
-    )
+    const { existingHashtags, notExistingHashtags } = await handleHashtags(hashtags)
 
     return await prisma.tweet.create({
       data: {
         content,
         authorId: userId,
+        hashtags: {
+          connect: existingHashtags.map((h) => ({
+            id: h.id,
+          })),
+          create: notExistingHashtags.map((n) => ({ name: n })),
+        },
+      },
+    })
+  } catch (err) {
+    throw new Error(err)
+  }
+}
+
+exports.createReply = async (content, userId, tweetId) => {
+  try {
+    const hashtags = extractHashtags(content)
+
+    if (!hashtags) {
+      return await prisma.tweet.create({
+        data: {
+          content,
+          authorId: userId,
+          originalTweetId: tweetId
+        },
+      })
+    }
+
+    const { existingHashtags, notExistingHashtags } = await handleHashtags(hashtags)
+
+    return await prisma.tweet.create({
+      data: {
+        content,
+        authorId: userId,
+        originalTweetId: tweetId,
         hashtags: {
           connect: existingHashtags.map((h) => ({
             id: h.id,

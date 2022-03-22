@@ -7,6 +7,7 @@ router.get("/feed", authJwt.verifyToken, tweetController.getMyFeed)
 router.get("/:id", tweetController.getTweetById)
 
 router.post("/", authJwt.verifyToken, verifyTweet.validateContent, tweetController.tweet)
+router.post("/:id", authJwt.verifyToken, verifyTweet.validateContent, tweetController.reply)
 router.post("/like/:id", authJwt.verifyToken, tweetController.likeTweet)
 router.post("/retweet/:id", authJwt.verifyToken, tweetController.retweetTweet)
 
