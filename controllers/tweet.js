@@ -77,7 +77,17 @@ exports.getTweetReplies = async (req, res) => {
   const { id } = req.params
 
   try {
-    const replies = await findRepliesByTweetId(id)
+    const replies = await findRepliesByTweetId(id, {
+      include: {
+        _count: {
+          select: {
+            responses: true,
+            likes: true,
+            retweets: true,
+          },
+        },
+      },
+    })
 
     return res.status(200).send(
       replies,

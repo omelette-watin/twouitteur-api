@@ -109,6 +109,11 @@ exports.findRepliesByTweetId = async (tweetId, options = {}) => {
       where: {
         originalTweetId: tweetId,
       },
+      orderBy: {
+        likes: {
+          _count: "desc"
+        }
+      },
       ...options,
     })
   } catch (err) {
