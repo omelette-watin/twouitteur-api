@@ -1,4 +1,4 @@
-const { findTweetById, getUserFeed, like, retweet, createTweet, createReply } = require("../services/tweet")
+const { findTweetById, getUserFeed, like, retweet, createTweet, createReply, findRepliesByTweetId } = require("../services/tweet")
 
 exports.tweet = async (req, res) => {
   const {
@@ -41,20 +41,6 @@ exports.reply = async (req, res) => {
   }
 }
 
-exports.getMyFeed = async (req, res) => {
-  const { userId } = req
-
-  try {
-    const mytweetFeed = await getUserFeed(userId)
-
-    return res.status(200).send(mytweetFeed)
-  } catch (err) {
-    return res.status(500).send({
-      message: err.message,
-    })
-  }
-}
-
 exports.getTweetById = async (req, res) => {
   const { id } = req.params
 
@@ -77,9 +63,39 @@ exports.getTweetById = async (req, res) => {
       })
     }
 
-    return res.status(200).send({
+    return res.status(200).send(
       tweet,
+    )
+  } catch (err) {
+    return res.status(500).send({
+      message: err.message,
     })
+  }
+}
+
+exports.getTweetReplies = async (req, res) => {
+  const { id } = req.params
+
+  try {
+    const replies = await findRepliesByTweetId(id)
+
+    return res.status(200).send(
+      replies,
+    )
+  } catch (err) {
+    return res.status(500).send({
+      message: err.message,
+    })
+  }
+}
+
+exports.getMyFeed = async (req, res) => {
+  const { userId } = req
+
+  try {
+    const myFeed = await getUserFeed(userId)
+
+    return res.status(200).send(myFeed)
   } catch (err) {
     return res.status(500).send({
       message: err.message,

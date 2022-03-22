@@ -103,6 +103,19 @@ exports.findTweetById = async (tweetId, options = {}) => {
   }
 }
 
+exports.findRepliesByTweetId = async (tweetId, options = {}) => {
+  try {
+    return await prisma.tweet.findMany({
+      where: {
+        originalTweetId: tweetId,
+      },
+      ...options,
+    })
+  } catch (err) {
+    throw new Error(err)
+  }
+}
+
 exports.getUserFeed = async (userId, options = {}) => {
   try {
     return await prisma.tweet.findMany({
