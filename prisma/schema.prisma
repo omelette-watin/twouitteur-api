@@ -13,6 +13,7 @@ model User {
   username    String    @unique
   profilename String?
   password    String
+  bio         String?
   createdAt   DateTime  @default(now())
   isAdmin     Boolean   @default(false)
   tweets      Tweet[]
@@ -36,9 +37,10 @@ model Tweet {
   id              String    @id @default(cuid())
   content         String
   createdAt       DateTime  @default(now())
+  deleted         Boolean   @default(false)
+  media           String[]
   author          User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId        String
-  deleted         Boolean   @default(false)
   originalTweet   Tweet?    @relation("Responses", fields: [originalTweetId], references: [id], onDelete: Cascade)
   originalTweetId String?
   responses       Tweet[]   @relation("Responses")
@@ -51,7 +53,7 @@ model Hashtag {
   id        String   @id @default(cuid())
   name      String   @unique
   createdAt DateTime @default(now())
-  tweets Tweet[]
+  tweets    Tweet[]
 }
 
 model Retweet {
