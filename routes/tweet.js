@@ -5,6 +5,10 @@ const verifyTweet = require("../middlewares/verifyTweet")
 
 router.get("/feed", authJwt.verifyToken, tweetController.getMyFeed)
 router.get("/:id", tweetController.getTweetById)
+
 router.post("/", authJwt.verifyToken, verifyTweet.validateContent, tweetController.tweet)
+router.post("/like/:id", authJwt.verifyToken, tweetController.likeTweet)
+router.post("/retweet/:id", authJwt.verifyToken, tweetController.retweetTweet)
+
 
 module.exports = router

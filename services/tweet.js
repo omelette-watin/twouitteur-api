@@ -11,11 +11,8 @@ const extractHashtags = (str) => {
 }
 
 exports.tweet = async (content, userId) => {
-  console.log(content, userId)
-
   try {
     const hashtags = extractHashtags(content)
-    console.log(hashtags)
 
     if (!hashtags) {
       return await prisma.tweet.create({
@@ -114,6 +111,70 @@ exports.getUserFeed = async (userId, options = {}) => {
       },
       ...options,
     })
+  } catch (err) {
+    throw new Error(err)
+  }
+}
+
+exports.like = async (tweetId, userId) => {
+  try {
+    const existingLike = await prisma.like.findFirst({
+      where: {
+        tweetId,
+        userId,
+      },
+    })
+
+    if (existingLike) {
+      await prisma.like.delete({
+        where: {
+          id: existingLike.id,
+        },
+      })
+
+      return { message: "Tweet unliked" }
+    }
+
+    await prisma.like.create({
+      data: {
+        userId,
+        tweetId,
+      },
+    })
+
+    return { message: "Tweet liked" }
+  } catch (err) {
+    throw new Error(err)
+  }
+}
+
+exports.retweet = async (tweetId, userId) => {
+  try {
+    const existingRetweet = await prisma.retweet.findFirst({
+      where: {
+        tweetId,
+        userId,
+      },
+    })
+
+    if (existingRetweet) {
+      await prisma.like.delete({
+        where: {
+          id: existingRetweet.id,
+        },
+      })
+
+      return { message: "Tweet not retweeted anymore" }
+    }
+
+    await prisma.like.create({
+      data: {
+        tweetId,
+        userId,
+      },
+    })
+
+    return { message: "Tweet retweeted" }
   } catch (err) {
     throw new Error(err)
   }
