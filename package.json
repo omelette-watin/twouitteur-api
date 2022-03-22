@@ -23,12 +23,14 @@
     "yup": "^0.32.11"
   },
   "devDependencies": {
+    "@mermaid-js/mermaid-cli": "^8.14.0",
     "eslint": "^8.11.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-react": "^7.29.4",
     "eslint-plugin-react-hooks": "^4.3.0",
     "nodemon": "^2.0.15",
     "prettier": "^2.6.0",
-    "prisma": "^3.11.0"
+    "prisma": "^3.11.0",
+    "prisma-erd-generator": "^0.10.1"
   }
 }
