@@ -6,7 +6,7 @@ const verifyTweet = require("../middlewares/verifyTweet")
 router.get("/feed", authJwt.verifyToken, tweetController.getMyFeed)
 router.get("/:id", tweetController.getTweetById)
 router.get("/replies/:id", tweetController.getTweetReplies)
-
+router.get("/hashtag/:name", tweetController.getTweetsByHashtag)
 router.post("/", authJwt.verifyToken, verifyTweet.validateContent, tweetController.tweet)
 router.post("/:id", authJwt.verifyToken, verifyTweet.validateContent, tweetController.reply)
 router.post("/like/:id", authJwt.verifyToken, tweetController.likeTweet)

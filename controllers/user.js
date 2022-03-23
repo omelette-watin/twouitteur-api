@@ -95,3 +95,7 @@ exports.getUserByUsername = async (req, res) => {
     })
   }
 }
+
+// follow/unfollow
+// getMyFollows
+// block/unblock ?

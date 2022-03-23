@@ -1,4 +1,4 @@
-const { findTweetById, getUserFeed, like, retweet, createTweet, createReply, findRepliesByTweetId } = require("../services/tweet")
+const { findTweetById, getUserFeed, like, retweet, createTweet, createReply, findRepliesByTweetId, findTweetsByHashtag } = require("../services/tweet")
 
 exports.tweet = async (req, res) => {
   const {
@@ -156,3 +156,23 @@ exports.retweetTweet = async (req, res) => {
     })
   }
 }
+
+exports.getTweetsByHashtag = async (req, res) => {
+  const {
+    params: { name }
+  } = req
+
+  try {
+    const tweets = await findTweetsByHashtag(name)
+
+    return res.status(200).send(tweets)
+  } catch (err) {
+    return res.status(500).send({
+      message: err.message,
+    })
+  }
+}
+
+// getTweetsByHashtags
+// getTweetsByContent
+// getMyLikes

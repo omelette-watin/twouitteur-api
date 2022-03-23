@@ -121,6 +121,26 @@ exports.findRepliesByTweetId = async (tweetId, options = {}) => {
   }
 }
 
+exports.findTweetsByHashtag = async (hashtag, options = {}) => {
+  try {
+    return await prisma.tweet.findMany({
+      where: {
+        hashtags: {
+          some: {
+            name: hashtag
+          }
+        }
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      ...options,
+    })
+  } catch (err) {
+    throw new Error(err)
+  }
+}
+
 exports.getUserFeed = async (userId, options = {}) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: userId }, include: { following: true } })
