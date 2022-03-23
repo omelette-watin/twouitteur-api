@@ -8,6 +8,7 @@ const possibleErrors = {
     length: "Your username must have between 3 and 15 characters",
     nospace: "Your username mustn't have whitespaces",
     noat: "Your password mustn't have '@' symbol",
+    emoji: "Your password mustn't have emojis in it",
     used: "This username is already used",
   },
   email: {
@@ -28,7 +29,8 @@ const registerSchema = object({
     .min(3, possibleErrors.username.length)
     .max(15, possibleErrors.username.length)
     .matches(/^[^\s)]+$/, possibleErrors.username.nospace)
-    .matches(/^[^@]+$/, possibleErrors.username.noat),
+    .matches(/^[^@]+$/, possibleErrors.username.noat)
+    .matches(/^[\u0020-\u007e\u00a0-\u00ff\u0152\u0153\u0178]+$/, possibleErrors.username.emoji),
   email: string()
     .required(possibleErrors.common.required)
     .email(possibleErrors.invalid),
