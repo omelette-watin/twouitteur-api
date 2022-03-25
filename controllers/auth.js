@@ -8,16 +8,16 @@ exports.register = async (req, res) => {
 
   try {
     const newUser = await createUser(username, email, password)
+    const token = jwt.sign({ id: newUser.id }, authConfig.SECRET_KEY, {
+      expiresIn: 86400,
+    })
 
-    if (newUser) {
-      req.session.token = jwt.sign({ id: newUser.id }, authConfig.SECRET_KEY, {
-        expiresIn: 86400,
-      })
+    req.session.token = token
 
-      return res.status(200).send({
-        message: "Account successfully created",
-      })
-    }
+    return res.status(200).send({
+      token,
+      message: "Account successfully created",
+    })
   } catch (err) {
     return res.status(500).send({
       message: err.message,
@@ -48,13 +48,14 @@ exports.login = async (req, res) => {
       })
     }
 
-    req.session.token = jwt.sign(
+    const token = jwt.sign(
       { id: existingUser.id },
       authConfig.SECRET_KEY,
       {
         expiresIn: 86400,
       }
     )
+    req.session.token = token
 
     return res.status(200).send({
       message: "You are logged in",
@@ -64,6 +65,7 @@ exports.login = async (req, res) => {
         profilename: existingUser.profilename,
         email: existingUser.email,
         isAdmin: existingUser.isAdmin,
+        token,
       },
     })
   } catch (err) {

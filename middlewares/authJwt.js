@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken")
 const authConfig = require("../config/auth")
 const { findUserById } = require("../services/user")
 const verifyToken = (req, res, next) => {
-  const token = req.session.token
+  const token = req.session.token || req.headers["x-access-token"]
 
   if (!token) {
     return res.status(403).send({ message: "No token provided" })
