@@ -53,7 +53,7 @@ const validateData = async (req, res, next) => {
     next()
   } catch (err) {
     return res.status(400).send({
-      erreurs: err.errors,
+      errors: err.errors,
     })
   }
 }
@@ -65,13 +65,13 @@ const checkDuplicateUsernameOrEmail = async (req, res, next) => {
 
     if (existingUser && existingUser.email === username) {
       return res.status(400).send({
-        message: possibleErrors.email.used,
+        errors: [possibleErrors.email.used],
       })
     }
 
     if (existingUser && existingUser.username === username) {
       return res.status(400).send({
-        message: possibleErrors.username.used,
+        errors: [possibleErrors.username.used],
       })
     }
 
