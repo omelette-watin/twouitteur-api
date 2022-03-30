@@ -18,6 +18,7 @@ model User {
   profilename String?
   password    String
   bio         String?
+  image       String?
   createdAt   DateTime  @default(now())
   isAdmin     Boolean   @default(false)
   tweets      Tweet[]
