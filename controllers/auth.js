@@ -44,29 +44,18 @@ exports.login = async (req, res) => {
 
     if (!isPasswordValid) {
       return res.status(401).send({
-        message: "Invalid password",
+        message: "Invalid credentials",
       })
     }
 
-    const token = jwt.sign(
-      { id: existingUser.id },
-      authConfig.SECRET_KEY,
-      {
-        expiresIn: 86400,
-      }
-    )
+    const token = jwt.sign({ id: existingUser.id }, authConfig.SECRET_KEY, {
+      expiresIn: 86400,
+    })
     req.session.token = token
 
     return res.status(200).send({
+      token,
       message: "You are logged in",
-      user: {
-        id: existingUser.id,
-        username: existingUser.username,
-        profilename: existingUser.profilename,
-        email: existingUser.email,
-        isAdmin: existingUser.isAdmin,
-        token,
-      },
     })
   } catch (err) {
     return res.status(500).send({
