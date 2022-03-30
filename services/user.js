@@ -77,3 +77,20 @@ exports.follow = async (followerId, followingId) => {
     throw new Error(err)
   }
 }
+
+exports.findFollowsByUserId = async (userId, options =  {}) => {
+  try {
+    return prisma.user.findMany({
+      where: {
+        followers: {
+          some: {
+            id: userId
+          }
+        }
+      },
+      ...options,
+    })
+  } catch (err) {
+    throw new Error(err)
+  }
+}
