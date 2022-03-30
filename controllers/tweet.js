@@ -23,12 +23,12 @@ exports.tweet = async (req, res) => {
 exports.reply = async (req, res) => {
   const {
     userId,
-    params: { id },
+    params: { tweetId },
     body: { content },
   } = req
 
   try {
-    const newReply = await createReply(content, userId, id)
+    const newReply = await createReply(content, userId, tweetId)
 
     return res.status(200).send({
       message: "Tweet posted",
@@ -42,10 +42,10 @@ exports.reply = async (req, res) => {
 }
 
 exports.getTweetById = async (req, res) => {
-  const { id } = req.params
+  const { tweetId } = req.params
 
   try {
-    const tweet = await findTweetById(id, {
+    const tweet = await findTweetById(tweetId, {
       include: {
         _count: {
           select: {
@@ -74,10 +74,10 @@ exports.getTweetById = async (req, res) => {
 }
 
 exports.getTweetReplies = async (req, res) => {
-  const { id } = req.params
+  const { tweetId } = req.params
 
   try {
-    const replies = await findRepliesByTweetId(id, {
+    const replies = await findRepliesByTweetId(tweetId, {
       include: {
         _count: {
           select: {
@@ -126,11 +126,11 @@ exports.getMyFeed = async (req, res) => {
 exports.likeTweet = async (req, res) => {
   const {
     userId,
-    params: { id },
+    params: { tweedId },
   } = req
 
   try {
-    const likeResult = await like(id, userId)
+    const likeResult = await like(tweedId, userId)
 
     return res.status(200).send(likeResult)
   } catch (err) {
@@ -143,11 +143,11 @@ exports.likeTweet = async (req, res) => {
 exports.retweetTweet = async (req, res) => {
   const {
     userId,
-    params: { id },
+    params: { tweetId },
   } = req
 
   try {
-    const retweetResult = await retweet(id, userId)
+    const retweetResult = await retweet(tweetId, userId)
 
     return res.status(200).send(retweetResult)
   } catch (err) {
@@ -173,6 +173,5 @@ exports.getTweetsByHashtag = async (req, res) => {
   }
 }
 
-// getTweetsByHashtags
 // getTweetsByContent
 // getMyLikes
