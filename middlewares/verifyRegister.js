@@ -1,46 +1,29 @@
 const { object, string } = require("yup")
 const { findUserByEmailOrUsername } = require("../services/user")
-const possibleErrors = {
-  common: {
-    required: "All fields are required",
-  },
-  username: {
-    length: "Your username must have between 3 and 15 characters",
-    nospace: "Your username mustn't have whitespaces",
-    noat: "Your password mustn't have '@' symbol",
-    emoji: "Your password mustn't have emojis in it",
-    used: "This username is already used",
-  },
-  email: {
-    invalid: "Your email adress is invalid",
-    used: "This email adress is already used",
-  },
-  password: {
-    length: "Your password must have between 8 and 40 characters",
-    digit: "Your password must include at least 1 number",
-    upper: "Your password must include at least 1 upper case letter",
-    lower: "Your password must include at least 1 lower case letter",
-  },
-}
 const registerSchema = object({
   username: string()
-    .required(possibleErrors.common.required)
+    .required("All fields are required")
     .trim()
-    .min(3, possibleErrors.username.length)
-    .max(15, possibleErrors.username.length)
-    .matches(/^[^\s)]+$/, possibleErrors.username.nospace)
-    .matches(/^[^@]+$/, possibleErrors.username.noat)
-    .matches(/^[\u0020-\u007e\u00a0-\u00ff\u0152\u0153\u0178]+$/, possibleErrors.username.emoji),
-  email: string()
-    .required(possibleErrors.common.required)
-    .email(possibleErrors.invalid),
+    .min(3, "Username must be at least 3 characters")
+    .max(15, "Username must be less than 15 characters")
+    .matches(/^[a-zA-Z0-9]+$/, "Username cannot contain special characters or spaces"),
+  email: string().required("All fields are required").email("Invalid email"),
   password: string()
-    .required(possibleErrors.common.required)
-    .min(8, possibleErrors.password.length)
-    .max(40, possibleErrors.password.length)
-    .matches(/\d/, possibleErrors.password.digit)
-    .matches(/[A-ZÀ-Ö]/, possibleErrors.password.upper)
-    .matches(/[a-zØ-öø-ÿ]/, possibleErrors.password.lower),
+    .required("All fields are required")
+    .min(8, "Password must be at least 8 characters")
+    .max(40, "Password must be less than 40 characters")
+    .matches(
+      /\d/,
+      "Password must contain at least 1 upper case, 1 lower case and one number"
+    )
+    .matches(
+      /[A-ZÀ-Ö]/,
+      "Password must contain at least 1 upper case, 1 lower case and one number"
+    )
+    .matches(
+      /[a-zØ-öø-ÿ]/,
+      "Password must contain at least 1 upper case, 1 lower case and one number"
+    ),
 })
 const validateData = async (req, res, next) => {
   const { username, email, password } = req.body
@@ -63,15 +46,26 @@ const checkDuplicateUsernameOrEmail = async (req, res, next) => {
   try {
     const existingUser = await findUserByEmailOrUsername(username, email)
 
-    if (existingUser && existingUser.email === username) {
+    if (
+      existingUser &&
+      existingUser.email === email &&
+      existingUser.username === username
+    ) {
       return res.status(400).send({
-        errors: [possibleErrors.email.used],
+        mailError: "This email is already used",
+        usernameError: "This username is already used",
+      })
+    }
+
+    if (existingUser && existingUser.email === email) {
+      return res.status(400).send({
+        mailError: "This email is already used",
       })
     }
 
     if (existingUser && existingUser.username === username) {
       return res.status(400).send({
-        errors: [possibleErrors.username.used],
+        usernameError: "This username is already used",
       })
     }
 
