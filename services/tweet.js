@@ -9,7 +9,7 @@ const extractHashtags = (str) => {
 
   return null
 }
-const handleHashtags  = async (hashtags) => {
+const handleHashtags = async (hashtags) => {
   const existingHashtags = await prisma.hashtag.findMany({
     where: {
       name: {
@@ -29,17 +29,19 @@ exports.createTweet = async (content, userId) => {
     const hashtags = extractHashtags(content)
 
     if (!hashtags) {
-      return await prisma.tweet.create({
+      return prisma.tweet.create({
         data: {
-          content,
+          content: content.toString("utf8"),
           authorId: userId,
         },
       })
     }
 
-    const { existingHashtags, notExistingHashtags } = await handleHashtags(hashtags)
+    const { existingHashtags, notExistingHashtags } = await handleHashtags(
+      hashtags
+    )
 
-    return await prisma.tweet.create({
+    return prisma.tweet.create({
       data: {
         content,
         authorId: userId,
@@ -61,18 +63,20 @@ exports.createReply = async (content, userId, tweetId) => {
     const hashtags = extractHashtags(content)
 
     if (!hashtags) {
-      return await prisma.tweet.create({
+      return prisma.tweet.create({
         data: {
           content,
           authorId: userId,
-          originalTweetId: tweetId
+          originalTweetId: tweetId,
         },
       })
     }
 
-    const { existingHashtags, notExistingHashtags } = await handleHashtags(hashtags)
+    const { existingHashtags, notExistingHashtags } = await handleHashtags(
+      hashtags
+    )
 
-    return await prisma.tweet.create({
+    return prisma.tweet.create({
       data: {
         content,
         authorId: userId,
@@ -92,7 +96,7 @@ exports.createReply = async (content, userId, tweetId) => {
 
 exports.findTweetById = async (tweetId, options = {}) => {
   try {
-    return await prisma.tweet.findUnique({
+    return prisma.tweet.findUnique({
       where: {
         id: tweetId,
       },
@@ -105,14 +109,14 @@ exports.findTweetById = async (tweetId, options = {}) => {
 
 exports.findRepliesByTweetId = async (tweetId, options = {}) => {
   try {
-    return await prisma.tweet.findMany({
+    return prisma.tweet.findMany({
       where: {
         originalTweetId: tweetId,
       },
       orderBy: {
         likes: {
-          _count: "desc"
-        }
+          _count: "desc",
+        },
       },
       ...options,
     })
@@ -123,13 +127,13 @@ exports.findRepliesByTweetId = async (tweetId, options = {}) => {
 
 exports.findTweetsByHashtag = async (hashtag, options = {}) => {
   try {
-    return await prisma.tweet.findMany({
+    return prisma.tweet.findMany({
       where: {
         hashtags: {
           some: {
-            name: hashtag
-          }
-        }
+            name: hashtag,
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -143,18 +147,21 @@ exports.findTweetsByHashtag = async (hashtag, options = {}) => {
 
 exports.getUserFeed = async (userId, options = {}) => {
   try {
-    const user = await prisma.user.findUnique({ where: { id: userId }, include: { following: true } })
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { following: true },
+    })
 
     if (user.following.length === 0) {
-      return await prisma.tweet.findMany({
+      return prisma.tweet.findMany({
         orderBy: {
-          createdAt: "desc"
+          createdAt: "desc",
         },
-        ...options
+        ...options,
       })
     }
 
-    return await prisma.tweet.findMany({
+    return prisma.tweet.findMany({
       where: {
         OR: [
           {
