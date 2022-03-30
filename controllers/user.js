@@ -25,10 +25,10 @@ exports.me = async (req, res) => {
 }
 
 exports.getUserById = async (req, res) => {
-  const { id } = req.params
+  const { userId } = req.params
 
   try {
-    const user = await findUserById(id, {
+    const user = await findUserById(userId, {
       include: {
         _count: {
           select: {
