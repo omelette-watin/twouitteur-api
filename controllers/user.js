@@ -1,4 +1,4 @@
-const { findUserById, findUserByEmailOrUsername } = require("../services/user")
+const { findUserById, findUserByEmailOrUsername, follow } = require("../services/user")
 
 exports.me = async (req, res) => {
   try {
@@ -96,6 +96,22 @@ exports.getUserByUsername = async (req, res) => {
   }
 }
 
-// follow/unfollow
+exports.follow = async (req, res) => {
+  const {
+    userId,
+    params: { followedUserId }
+  } = req
+
+  try {
+    const followResult = await follow(userId, followedUserId)
+
+    return res.status(200).send(followResult)
+  } catch (err) {
+    return res.status(500).send({
+      message: err.message,
+    })
+  }
+}
+
 // getMyFollows
 // block/unblock ?

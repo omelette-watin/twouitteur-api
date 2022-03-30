@@ -44,3 +44,36 @@ exports.createUser = async (username, email, password) => {
     throw new Error(err)
   }
 }
+
+exports.follow = async (followerId, followingId) => {
+  try {
+    const existingFollow = await prisma.follows.findFirst({
+      where: {
+        followerId,
+        followingId,
+      },
+    })
+
+    if (existingFollow) {
+      await prisma.follows.deleteMany({
+        where: {
+          followerId,
+          followingId,
+        },
+      })
+
+      return { message: "User unfollowed" }
+    }
+
+    await prisma.follows.create({
+      data: {
+        followerId,
+        followingId,
+      },
+    })
+
+    return { message: "User followed" }
+  } catch (err) {
+    throw new Error(err)
+  }
+}
