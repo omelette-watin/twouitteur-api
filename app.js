@@ -8,7 +8,7 @@ require("dotenv").config()
 const app = express()
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: process.env.FRONT_URL || "http://192.168.1.72:3000",
     credentials: true,
   })
 )
