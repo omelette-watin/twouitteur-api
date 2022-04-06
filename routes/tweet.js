@@ -4,7 +4,7 @@ const authJwt = require("../middlewares/authJwt")
 const verifyTweet = require("../middlewares/verifyTweet")
 
 router.get("/feed", authJwt.verifyToken, tweetController.getMyFeed)
-router.get("/:tweedId", tweetController.getTweetById)
+router.get("/:tweetId", tweetController.getTweetById)
 router.get("/:tweetId/replies", tweetController.getTweetReplies)
 router.get("/hashtag/:name", tweetController.getTweetsByHashtag)
 
