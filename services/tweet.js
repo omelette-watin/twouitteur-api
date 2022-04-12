@@ -1,6 +1,6 @@
 const { prisma } = require("../config/prisma")
 const extractHashtags = (str) => {
-  const reg = /(?<=[\s>]|^)#(\d*[A-Za-zÀ-ÖØ-öø-ÿ_-]+\d*)\b/gu
+  const reg = /\B(#[0-9A-Za-zÀ-ÖØ-öø-ÿ_-]+)(?![0-9A-Za-zÀ-ÖØ-öø-ÿ_-])/g
   const hashtags = str.match(reg)
 
   if (hashtags) {
@@ -145,23 +145,18 @@ exports.findTweetsByHashtag = async (hashtag, options = {}) => {
   }
 }
 
-exports.getUserFeed = async (userId, options = {}) => {
+exports.getUserFeed = async (userId, cursor = null, options = {}) => {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: { following: true },
-    })
-
-    if (user.following.length === 0) {
-      return prisma.tweet.findMany({
-        orderBy: {
-          createdAt: "desc",
-        },
-        ...options,
-      })
-    }
-
-    return prisma.tweet.findMany({
+    const where = cursor
+      ? {
+          where: {
+            incId: {
+              lt: parseInt(cursor),
+            },
+          },
+        }
+      : {}
+    const feed = await prisma.tweet.findMany({
       where: {
         OR: [
           {
@@ -206,6 +201,18 @@ exports.getUserFeed = async (userId, options = {}) => {
       },
       ...options,
     })
+
+    if (feed.length === 0) {
+      return prisma.tweet.findMany({
+        ...where,
+        orderBy: {
+          createdAt: "desc",
+        },
+        ...options,
+      })
+    }
+
+    return feed
   } catch (err) {
     throw new Error(err)
   }
@@ -253,7 +260,7 @@ exports.retweet = async (tweetId, userId) => {
     })
 
     if (existingRetweet) {
-      await prisma.like.delete({
+      await prisma.retweet.delete({
         where: {
           id: existingRetweet.id,
         },
@@ -262,7 +269,7 @@ exports.retweet = async (tweetId, userId) => {
       return { message: "Tweet not retweeted anymore" }
     }
 
-    await prisma.like.create({
+    await prisma.retweet.create({
       data: {
         tweetId,
         userId,

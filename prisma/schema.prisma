@@ -40,6 +40,7 @@ model Follows {
 
 model Tweet {
   id              String    @id @default(cuid())
+  incId           Int       @default(autoincrement())
   content         String
   createdAt       DateTime  @default(now())
   deleted         Boolean   @default(false)

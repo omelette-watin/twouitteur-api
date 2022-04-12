@@ -1,8 +1,26 @@
-const { findUserById, findUserByEmailOrUsername, follow, findFollowsByUserId } = require("../services/user")
+const {
+  findUserById,
+  findUserByEmailOrUsername,
+  follow,
+  findFollowsByUserId,
+} = require("../services/user")
 
 exports.me = async (req, res) => {
   try {
-    const me = await findUserById(req.userId)
+    const me = await findUserById(req.userId, {
+      include: {
+        likes: {
+          select: {
+            tweetId: true,
+          },
+        },
+        retweets: {
+          select: {
+            tweetId: true,
+          },
+        },
+      },
+    })
 
     if (!me) {
       return res.status(404).send({
@@ -16,6 +34,8 @@ exports.me = async (req, res) => {
       profilename: me.profilename || me.username,
       email: me.email,
       isAdmin: me.isAdmin,
+      likes: me.likes.map((like) => like.tweetId),
+      retweets: me.retweets.map((retweet) => retweet.tweetId),
     })
   } catch (err) {
     return res.status(500).send({
@@ -99,7 +119,7 @@ exports.getUserByUsername = async (req, res) => {
 exports.follow = async (req, res) => {
   const {
     userId,
-    params: { followedUserId }
+    params: { followedUserId },
   } = req
 
   try {
@@ -121,11 +141,11 @@ exports.getMyFollows = async (req, res) => {
       select: {
         id: true,
         username: true,
-      }
+      },
     })
 
     return res.status(200).send({
-      follows
+      follows,
     })
   } catch (err) {
     return res.status(500).send({
@@ -134,4 +154,6 @@ exports.getMyFollows = async (req, res) => {
   }
 }
 
+// update account
+// delete account
 // block/unblock ?

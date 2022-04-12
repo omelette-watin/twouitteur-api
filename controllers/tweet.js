@@ -1,4 +1,13 @@
-const { findTweetById, getUserFeed, like, retweet, createTweet, createReply, findRepliesByTweetId, findTweetsByHashtag } = require("../services/tweet")
+const {
+  findTweetById,
+  getUserFeed,
+  like,
+  retweet,
+  createTweet,
+  createReply,
+  findRepliesByTweetId,
+  findTweetsByHashtag,
+} = require("../services/tweet")
 
 exports.tweet = async (req, res) => {
   const {
@@ -11,7 +20,7 @@ exports.tweet = async (req, res) => {
 
     return res.status(200).send({
       message: "Tweet posted",
-      id: newTweet.id,
+      tweet: newTweet,
     })
   } catch (err) {
     return res.status(500).send({
@@ -32,7 +41,7 @@ exports.reply = async (req, res) => {
 
     return res.status(200).send({
       message: "Tweet posted",
-      id: newReply.id,
+      tweet: newReply,
     })
   } catch (err) {
     return res.status(500).send({
@@ -63,9 +72,7 @@ exports.getTweetById = async (req, res) => {
       })
     }
 
-    return res.status(200).send(
-      tweet,
-    )
+    return res.status(200).send(tweet)
   } catch (err) {
     return res.status(500).send({
       message: err.message,
@@ -89,9 +96,7 @@ exports.getTweetReplies = async (req, res) => {
       },
     })
 
-    return res.status(200).send(
-      replies,
-    )
+    return res.status(200).send(replies)
   } catch (err) {
     return res.status(500).send({
       message: err.message,
@@ -101,15 +106,34 @@ exports.getTweetReplies = async (req, res) => {
 
 exports.getMyFeed = async (req, res) => {
   const { userId } = req
+  const { cursor } = req.query
 
   try {
-    const myFeed = await getUserFeed(userId, {
+    const myFeed = await getUserFeed(userId, cursor, {
+      take: 10,
       include: {
         _count: {
           select: {
             responses: true,
             likes: true,
             retweets: true,
+          },
+        },
+        author: {
+          select: {
+            username: true,
+            profilename: true,
+            image: true,
+            id: true,
+          },
+        },
+        originalTweet: {
+          select: {
+            author: {
+              select: {
+                username: true,
+              },
+            },
           },
         },
       },
@@ -126,14 +150,16 @@ exports.getMyFeed = async (req, res) => {
 exports.likeTweet = async (req, res) => {
   const {
     userId,
-    params: { tweedId },
+    params: { tweetId },
   } = req
 
   try {
-    const likeResult = await like(tweedId, userId)
+    const likeResult = await like(tweetId, userId)
 
     return res.status(200).send(likeResult)
   } catch (err) {
+    console.log(err)
+
     return res.status(500).send({
       message: err.message,
     })
@@ -159,7 +185,7 @@ exports.retweetTweet = async (req, res) => {
 
 exports.getTweetsByHashtag = async (req, res) => {
   const {
-    params: { name }
+    params: { name },
   } = req
 
   try {
@@ -175,3 +201,5 @@ exports.getTweetsByHashtag = async (req, res) => {
 
 // getTweetsByContent
 // getMyLikes
+// deleteTweet
+// getMyRetweets
