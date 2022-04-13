@@ -17,8 +17,8 @@ model User {
   username    String    @unique
   profilename String?
   password    String
-  bio         String?
-  image       String?
+  bio         String?    
+  image       String    @default("/avatars/21.svg")
   createdAt   DateTime  @default(now())
   isAdmin     Boolean   @default(false)
   tweets      Tweet[]
