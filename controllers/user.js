@@ -33,7 +33,7 @@ exports.me = async (req, res) => {
       username: me.username,
       profilename: me.profilename || me.username,
       email: me.email,
-      isAdmin: me.isAdmin,
+      image: me.image,
       likes: me.likes.map((like) => like.tweetId),
       retweets: me.retweets.map((retweet) => retweet.tweetId),
     })
