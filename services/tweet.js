@@ -179,13 +179,13 @@ exports.createReply = async (content, userId, tweetId) => {
   }
 }
 
-exports.findTweetById = async (tweetId, options = {}) => {
+exports.findTweetById = async (tweetId, include = {}) => {
   try {
     return prisma.tweet.findUnique({
       where: {
         id: tweetId,
       },
-      ...options,
+      include: includeFields(include),
     })
   } catch (err) {
     throw new Error(err)

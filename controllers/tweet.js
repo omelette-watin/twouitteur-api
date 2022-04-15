@@ -55,15 +55,9 @@ exports.getTweetById = async (req, res) => {
 
   try {
     const tweet = await findTweetById(tweetId, {
-      include: {
-        _count: {
-          select: {
-            responses: true,
-            likes: true,
-            retweets: true,
-          },
-        },
-      },
+      author: true,
+      originalTweet: true,
+      stats: true,
     })
 
     if (!tweet) {
