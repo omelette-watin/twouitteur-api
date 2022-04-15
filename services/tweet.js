@@ -87,13 +87,14 @@ const includeFields = ({ author, originalTweet, stats }) => {
 
   return include
 }
-const genericFinder = async (
-  whereCondition,
-  take = 10,
-  cursor = null,
-  order = "latest",
-  include = {}
-) => {
+const genericFinder = async (whereCondition, options) => {
+  const {
+    take = 10,
+    cursor = null,
+    order = "latest",
+    include: { author = false, originalTweet = false, stats = false },
+  } = options
+
   try {
     return prisma.tweet.findMany({
       where: {
@@ -102,8 +103,45 @@ const genericFinder = async (
       },
       take,
       orderBy: orderBy(order),
+      include: includeFields({ author, originalTweet, stats }),
+    })
+  } catch (err) {
+    throw new Error(err)
+  }
+}
+
+exports.findTweetById = async (tweetId, include = {}) => {
+  try {
+    return prisma.tweet.findUnique({
+      where: {
+        id: tweetId,
+      },
       include: includeFields(include),
     })
+  } catch (err) {
+    throw new Error(err)
+  }
+}
+
+exports.findRepliesByTweetId = async (tweetId, options) => {
+  try {
+    return genericFinder({ originalTweetId: tweetId }, options)
+  } catch (err) {
+    throw new Error(err)
+  }
+}
+
+exports.findTweetsByHashtag = async (hashtagName, options) => {
+  try {
+    return genericFinder({ hashtags: { some: { name: hashtagName } } }, options)
+  } catch (err) {
+    throw new Error(err)
+  }
+}
+
+exports.getUserFeed = async (userId, options = {}) => {
+  try {
+    return genericFinder({}, options)
   } catch (err) {
     throw new Error(err)
   }
@@ -174,43 +212,6 @@ exports.createReply = async (content, userId, tweetId) => {
         },
       },
     })
-  } catch (err) {
-    throw new Error(err)
-  }
-}
-
-exports.findTweetById = async (tweetId, include = {}) => {
-  try {
-    return prisma.tweet.findUnique({
-      where: {
-        id: tweetId,
-      },
-      include: includeFields(include),
-    })
-  } catch (err) {
-    throw new Error(err)
-  }
-}
-
-exports.findRepliesByTweetId = async (tweetId, ...rest) => {
-  try {
-    return genericFinder({ originalTweetId: tweetId }, ...rest)
-  } catch (err) {
-    throw new Error(err)
-  }
-}
-
-exports.findTweetsByHashtag = async (hashtagName, ...rest) => {
-  try {
-    return genericFinder({ hashtags: { some: { name: hashtagName } } }, ...rest)
-  } catch (err) {
-    throw new Error(err)
-  }
-}
-
-exports.getUserFeed = async (userId, ...rest) => {
-  try {
-    return genericFinder({}, ...rest)
   } catch (err) {
     throw new Error(err)
   }

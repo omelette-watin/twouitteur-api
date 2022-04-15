@@ -9,6 +9,109 @@ const {
   findTweetsByHashtag,
 } = require("../services/tweet")
 
+exports.getTweetById = async (req, res) => {
+  const { tweetId } = req.params
+
+  try {
+    const tweet = await findTweetById(tweetId, {
+      author: true,
+      originalTweet: true,
+      stats: true,
+    })
+
+    if (!tweet) {
+      return res.status(404).send({
+        message: "Tweet not found",
+      })
+    }
+
+    return res.status(200).send(tweet)
+  } catch (err) {
+    return res.status(500).send({
+      message: err.message,
+    })
+  }
+}
+
+exports.getTweetReplies = async (req, res) => {
+  const {
+    params: { tweetId },
+    query: { cursor, order },
+  } = req
+
+  try {
+    const options = {
+      take: 5,
+      cursor,
+      order,
+      include: {
+        author: true,
+        originalTweet: true,
+        stats: true,
+      },
+    }
+    const replies = await findRepliesByTweetId(tweetId, options)
+
+    return res.status(200).send(replies)
+  } catch (err) {
+    return res.status(500).send({
+      message: err.message,
+    })
+  }
+}
+
+exports.getMyFeed = async (req, res) => {
+  const { userId } = req
+  const { cursor, order } = req.query
+
+  try {
+    const options = {
+      take: 5,
+      cursor,
+      order,
+      include: {
+        author: true,
+        originalTweet: true,
+        stats: true,
+      },
+    }
+    const myFeed = await getUserFeed(userId, options)
+
+    return res.status(200).send(myFeed)
+  } catch (err) {
+    return res.status(500).send({
+      message: err.message,
+    })
+  }
+}
+
+exports.getTweetsByHashtag = async (req, res) => {
+  const {
+    params: { name },
+    query: { cursor, order },
+  } = req
+
+  try {
+    const options = {
+      take: 5,
+      cursor,
+      order,
+      include: {
+        author: true,
+        originalTweet: true,
+        stats: true,
+      },
+    }
+    const tweets = await findTweetsByHashtag(name, options)
+
+    return res.status(200).send(tweets)
+  } catch (err) {
+    return res.status(500).send({
+      message: err.message,
+    })
+  }
+}
+
 exports.tweet = async (req, res) => {
   const {
     userId,
@@ -43,91 +146,6 @@ exports.reply = async (req, res) => {
       message: "Tweet posted",
       tweet: newReply,
     })
-  } catch (err) {
-    return res.status(500).send({
-      message: err.message,
-    })
-  }
-}
-
-exports.getTweetById = async (req, res) => {
-  const { tweetId } = req.params
-
-  try {
-    const tweet = await findTweetById(tweetId, {
-      author: true,
-      originalTweet: true,
-      stats: true,
-    })
-
-    if (!tweet) {
-      return res.status(404).send({
-        message: "Tweet not found",
-      })
-    }
-
-    return res.status(200).send(tweet)
-  } catch (err) {
-    return res.status(500).send({
-      message: err.message,
-    })
-  }
-}
-
-exports.getTweetReplies = async (req, res) => {
-  const {
-    params: { tweetId },
-    query: { cursor, order },
-  } = req
-
-  try {
-    const replies = await findRepliesByTweetId(tweetId, 5, cursor, order, {
-      author: true,
-      originalTweet: true,
-      stats: true,
-    })
-
-    return res.status(200).send(replies)
-  } catch (err) {
-    return res.status(500).send({
-      message: err.message,
-    })
-  }
-}
-
-exports.getMyFeed = async (req, res) => {
-  const { userId } = req
-  const { cursor, order } = req.query
-
-  try {
-    const myFeed = await getUserFeed(userId, 5, cursor, order, {
-      author: true,
-      originalTweet: true,
-      stats: true,
-    })
-
-    return res.status(200).send(myFeed)
-  } catch (err) {
-    return res.status(500).send({
-      message: err.message,
-    })
-  }
-}
-
-exports.getTweetsByHashtag = async (req, res) => {
-  const {
-    params: { name },
-    query: { cursor, order },
-  } = req
-
-  try {
-    const tweets = await findTweetsByHashtag(name, 5, cursor, order, {
-      author: true,
-      originalTweet: true,
-      stats: true,
-    })
-
-    return res.status(200).send(tweets)
   } catch (err) {
     return res.status(500).send({
       message: err.message,
