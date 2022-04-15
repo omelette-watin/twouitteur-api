@@ -110,13 +110,17 @@ const genericFinder = async (whereCondition, options) => {
   }
 }
 
-exports.findTweetById = async (tweetId, include = {}) => {
+exports.findTweetById = async (tweetId, options) => {
+  const {
+    include: { author = false, originalTweet = false, stats = false },
+  } = options
+
   try {
     return prisma.tweet.findUnique({
       where: {
         id: tweetId,
       },
-      include: includeFields(include),
+      include: includeFields({ author, originalTweet, stats }),
     })
   } catch (err) {
     throw new Error(err)

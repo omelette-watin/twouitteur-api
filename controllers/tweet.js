@@ -13,11 +13,14 @@ exports.getTweetById = async (req, res) => {
   const { tweetId } = req.params
 
   try {
-    const tweet = await findTweetById(tweetId, {
-      author: true,
-      originalTweet: true,
-      stats: true,
-    })
+    const options = {
+      include: {
+        author: true,
+        originalTweet: true,
+        stats: true,
+      },
+    }
+    const tweet = await findTweetById(tweetId, options)
 
     if (!tweet) {
       return res.status(404).send({
