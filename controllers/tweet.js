@@ -81,19 +81,16 @@ exports.getTweetById = async (req, res) => {
 }
 
 exports.getTweetReplies = async (req, res) => {
-  const { tweetId } = req.params
+  const {
+    params: { tweetId },
+    query: { cursor, order },
+  } = req
 
   try {
-    const replies = await findRepliesByTweetId(tweetId, {
-      include: {
-        _count: {
-          select: {
-            responses: true,
-            likes: true,
-            retweets: true,
-          },
-        },
-      },
+    const replies = await findRepliesByTweetId(tweetId, 5, cursor, order, {
+      author: true,
+      originalTweet: true,
+      stats: true,
     })
 
     return res.status(200).send(replies)
@@ -106,40 +103,37 @@ exports.getTweetReplies = async (req, res) => {
 
 exports.getMyFeed = async (req, res) => {
   const { userId } = req
-  const { cursor } = req.query
+  const { cursor, order } = req.query
 
   try {
-    const myFeed = await getUserFeed(userId, cursor, {
-      take: 10,
-      include: {
-        _count: {
-          select: {
-            responses: true,
-            likes: true,
-            retweets: true,
-          },
-        },
-        author: {
-          select: {
-            username: true,
-            profilename: true,
-            image: true,
-            id: true,
-          },
-        },
-        originalTweet: {
-          select: {
-            author: {
-              select: {
-                username: true,
-              },
-            },
-          },
-        },
-      },
+    const myFeed = await getUserFeed(userId, 5, cursor, order, {
+      author: true,
+      originalTweet: true,
+      stats: true,
     })
 
     return res.status(200).send(myFeed)
+  } catch (err) {
+    return res.status(500).send({
+      message: err.message,
+    })
+  }
+}
+
+exports.getTweetsByHashtag = async (req, res) => {
+  const {
+    params: { name },
+    query: { cursor, order },
+  } = req
+
+  try {
+    const tweets = await findTweetsByHashtag(name, 5, cursor, order, {
+      author: true,
+      originalTweet: true,
+      stats: true,
+    })
+
+    return res.status(200).send(tweets)
   } catch (err) {
     return res.status(500).send({
       message: err.message,
@@ -176,22 +170,6 @@ exports.retweetTweet = async (req, res) => {
     const retweetResult = await retweet(tweetId, userId)
 
     return res.status(200).send(retweetResult)
-  } catch (err) {
-    return res.status(500).send({
-      message: err.message,
-    })
-  }
-}
-
-exports.getTweetsByHashtag = async (req, res) => {
-  const {
-    params: { name },
-  } = req
-
-  try {
-    const tweets = await findTweetsByHashtag(name)
-
-    return res.status(200).send(tweets)
   } catch (err) {
     return res.status(500).send({
       message: err.message,

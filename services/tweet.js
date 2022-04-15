@@ -23,6 +23,91 @@ const handleHashtags = async (hashtags) => {
 
   return { existingHashtags, notExistingHashtags }
 }
+const incIdLtThan = (cursor) => {
+  if (!cursor || !parseInt(cursor)) {
+    return {}
+  }
+
+  return {
+    incId: {
+      lt: parseInt(cursor),
+    },
+  }
+}
+const orderBy = (str) => {
+  if (!str || str === "latest") {
+    return {
+      createdAt: "desc",
+    }
+  }
+
+  if (str === "popular") {
+    return {
+      likes: {
+        _count: "desc",
+      },
+    }
+  }
+}
+const includeFields = ({ author, originalTweet, stats }) => {
+  const include = {}
+
+  if (author) {
+    include.author = {
+      select: {
+        username: true,
+        profilename: true,
+        image: true,
+        id: true,
+      },
+    }
+  }
+
+  if (originalTweet) {
+    include.originalTweet = {
+      select: {
+        author: {
+          select: {
+            username: true,
+          },
+        },
+      },
+    }
+  }
+
+  if (stats) {
+    include._count = {
+      select: {
+        responses: true,
+        likes: true,
+        retweets: true,
+      },
+    }
+  }
+
+  return include
+}
+const genericFinder = async (
+  whereCondition,
+  take = 10,
+  cursor = null,
+  order = "latest",
+  include = {}
+) => {
+  try {
+    return prisma.tweet.findMany({
+      where: {
+        ...whereCondition,
+        ...incIdLtThan(cursor),
+      },
+      take,
+      orderBy: orderBy(order),
+      include: includeFields(include),
+    })
+  } catch (err) {
+    throw new Error(err)
+  }
+}
 
 exports.createTweet = async (content, userId) => {
   try {
@@ -107,112 +192,25 @@ exports.findTweetById = async (tweetId, options = {}) => {
   }
 }
 
-exports.findRepliesByTweetId = async (tweetId, options = {}) => {
+exports.findRepliesByTweetId = async (tweetId, ...rest) => {
   try {
-    return prisma.tweet.findMany({
-      where: {
-        originalTweetId: tweetId,
-      },
-      orderBy: {
-        likes: {
-          _count: "desc",
-        },
-      },
-      ...options,
-    })
+    return genericFinder({ originalTweetId: tweetId }, ...rest)
   } catch (err) {
     throw new Error(err)
   }
 }
 
-exports.findTweetsByHashtag = async (hashtag, options = {}) => {
+exports.findTweetsByHashtag = async (hashtagName, ...rest) => {
   try {
-    return prisma.tweet.findMany({
-      where: {
-        hashtags: {
-          some: {
-            name: hashtag,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      ...options,
-    })
+    return genericFinder({ hashtags: { some: { name: hashtagName } } }, ...rest)
   } catch (err) {
     throw new Error(err)
   }
 }
 
-exports.getUserFeed = async (userId, cursor = null, options = {}) => {
+exports.getUserFeed = async (userId, ...rest) => {
   try {
-    const where = cursor
-      ? {
-          where: {
-            incId: {
-              lt: parseInt(cursor),
-            },
-          },
-        }
-      : {}
-    const feed = await prisma.tweet.findMany({
-      where: {
-        OR: [
-          {
-            author: {
-              followers: {
-                some: {
-                  followerId: userId,
-                },
-              },
-            },
-          },
-          {
-            likes: {
-              some: {
-                user: {
-                  followers: {
-                    some: {
-                      followerId: userId,
-                    },
-                  },
-                },
-              },
-            },
-          },
-          {
-            retweets: {
-              some: {
-                user: {
-                  followers: {
-                    some: {
-                      followerId: userId,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        ],
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      ...options,
-    })
-
-    if (feed.length === 0) {
-      return prisma.tweet.findMany({
-        ...where,
-        orderBy: {
-          createdAt: "desc",
-        },
-        ...options,
-      })
-    }
-
-    return feed
+    return genericFinder({}, ...rest)
   } catch (err) {
     throw new Error(err)
   }
@@ -281,3 +279,62 @@ exports.retweet = async (tweetId, userId) => {
     throw new Error(err)
   }
 }
+
+/** exports.getUserFeed = async (userId, options = {}) => {
+  try {
+    const feed = await prisma.tweet.findMany({
+      where: {
+        OR: [
+          {
+            author: {
+              followers: {
+                some: {
+                  followerId: userId,
+                },
+              },
+            },
+          },
+          {
+            likes: {
+              some: {
+                user: {
+                  followers: {
+                    some: {
+                      followerId: userId,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          {
+            retweets: {
+              some: {
+                user: {
+                  followers: {
+                    some: {
+                      followerId: userId,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      ...options,
+    })
+
+    return prisma.tweet.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      ...options,
+    })
+  } catch (err) {
+    throw new Error(err)
+  }
+} **/
