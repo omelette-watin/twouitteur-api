@@ -7,6 +7,7 @@ router.get("/feed", authJwt.verifyToken, tweetController.getMyFeed)
 router.get("/:tweetId", tweetController.getTweetById)
 router.get("/:tweetId/replies", tweetController.getTweetReplies)
 router.get("/hashtag/:name", tweetController.getTweetsByHashtag)
+router.get("/user/:userId", tweetController.getTweetsByUserId)
 
 router.post(
   "/",

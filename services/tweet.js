@@ -143,6 +143,14 @@ exports.findTweetsByHashtag = async (hashtagName, options) => {
   }
 }
 
+exports.findTweetsByUserId = async (userId, options = {}) => {
+  try {
+    return genericFinder({ authorId: userId }, options)
+  } catch (err) {
+    throw new Error(err)
+  }
+}
+
 exports.getUserFeed = async (userId, options = {}) => {
   try {
     return genericFinder({}, options)

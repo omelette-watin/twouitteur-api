@@ -7,6 +7,7 @@ const {
   createReply,
   findRepliesByTweetId,
   findTweetsByHashtag,
+  findTweetsByUserId,
 } = require("../services/tweet")
 
 exports.getTweetById = async (req, res) => {
@@ -64,8 +65,10 @@ exports.getTweetReplies = async (req, res) => {
 }
 
 exports.getMyFeed = async (req, res) => {
-  const { userId } = req
-  const { cursor, order } = req.query
+  const {
+    userId,
+    query: { cursor, order },
+  } = req
 
   try {
     const options = {
@@ -108,6 +111,33 @@ exports.getTweetsByHashtag = async (req, res) => {
     const tweets = await findTweetsByHashtag(name, options)
 
     return res.status(200).send(tweets)
+  } catch (err) {
+    return res.status(500).send({
+      message: err.message,
+    })
+  }
+}
+
+exports.getTweetsByUserId = async (req, res) => {
+  const {
+    params: { userId },
+    query: { cursor, order },
+  } = req
+
+  try {
+    const options = {
+      take: 5,
+      cursor,
+      order,
+      include: {
+        author: true,
+        originalTweet: true,
+        stats: true,
+      },
+    }
+    const myFeed = await findTweetsByUserId(userId, options)
+
+    return res.status(200).send(myFeed)
   } catch (err) {
     return res.status(500).send({
       message: err.message,
