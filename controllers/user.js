@@ -19,8 +19,11 @@ exports.me = async (req, res) => {
             tweetId: true,
           },
         },
-        following: true,
-        followers: true,
+        following: {
+          select: {
+            followingId: true,
+          },
+        },
       },
     })
 
@@ -38,8 +41,7 @@ exports.me = async (req, res) => {
       image: me.image,
       likes: me.likes.map((like) => like.tweetId),
       retweets: me.retweets.map((retweet) => retweet.tweetId),
-      following: me.following.map((follow) => follow.id),
-      followers: me.followers.map((follow) => follow.id),
+      following: me.following.map((follow) => follow.followingId),
     })
   } catch (err) {
     return res.status(500).send({
