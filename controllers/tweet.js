@@ -45,7 +45,7 @@ exports.getTweetReplies = async (req, res) => {
 
   try {
     const options = {
-      take: 5,
+      take: 8,
       cursor,
       order,
       include: {
@@ -72,7 +72,7 @@ exports.getMyFeed = async (req, res) => {
 
   try {
     const options = {
-      take: 5,
+      take: 8,
       cursor,
       order,
       include: {
@@ -99,7 +99,7 @@ exports.getTweetsByHashtag = async (req, res) => {
 
   try {
     const options = {
-      take: 5,
+      take: 8,
       cursor,
       order,
       include: {
@@ -126,7 +126,7 @@ exports.getTweetsByUserId = async (req, res) => {
 
   try {
     const options = {
-      take: 5,
+      take: 8,
       cursor,
       order,
       include: {
