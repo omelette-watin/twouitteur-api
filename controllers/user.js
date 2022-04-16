@@ -19,6 +19,8 @@ exports.me = async (req, res) => {
             tweetId: true,
           },
         },
+        following: true,
+        followers: true,
       },
     })
 
@@ -36,6 +38,8 @@ exports.me = async (req, res) => {
       image: me.image,
       likes: me.likes.map((like) => like.tweetId),
       retweets: me.retweets.map((retweet) => retweet.tweetId),
+      following: me.following.map((follow) => follow.id),
+      followers: me.followers.map((follow) => follow.id),
     })
   } catch (err) {
     return res.status(500).send({
@@ -107,6 +111,9 @@ exports.getUserByUsername = async (req, res) => {
       id: user.id,
       username: user.username,
       profilename: user.profilename || user.username,
+      image: user.image,
+      bio: user.bio,
+      joined: user.createdAt,
       stats: user._count,
     })
   } catch (err) {
