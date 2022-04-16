@@ -78,17 +78,30 @@ exports.follow = async (followerId, followingId) => {
   }
 }
 
-exports.findFollowsByUserId = async (userId, options =  {}) => {
+exports.findFollowsByUserId = async (userId, options = {}) => {
   try {
     return prisma.user.findMany({
       where: {
         followers: {
           some: {
-            id: userId
-          }
-        }
+            id: userId,
+          },
+        },
       },
       ...options,
+    })
+  } catch (err) {
+    throw new Error(err)
+  }
+}
+
+exports.updateUserById = async (userId, data) => {
+  try {
+    return prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data,
     })
   } catch (err) {
     throw new Error(err)

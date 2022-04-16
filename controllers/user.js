@@ -3,6 +3,7 @@ const {
   findUserByEmailOrUsername,
   follow,
   findFollowsByUserId,
+  updateUserById,
 } = require("../services/user")
 
 exports.me = async (req, res) => {
@@ -39,6 +40,7 @@ exports.me = async (req, res) => {
       profilename: me.profilename || me.username,
       email: me.email,
       image: me.image,
+      bio: me.bio || "",
       likes: me.likes.map((like) => like.tweetId),
       retweets: me.retweets.map((retweet) => retweet.tweetId),
       following: me.following.map((follow) => follow.followingId),
@@ -156,6 +158,20 @@ exports.getMyFollows = async (req, res) => {
     return res.status(200).send({
       follows,
     })
+  } catch (err) {
+    return res.status(500).send({
+      message: err.message,
+    })
+  }
+}
+
+exports.updateUser = async (req, res) => {
+  const { userId, body } = req
+
+  try {
+    const updateResult = await updateUserById(userId, body)
+
+    return res.status(200).send(updateResult)
   } catch (err) {
     return res.status(500).send({
       message: err.message,
